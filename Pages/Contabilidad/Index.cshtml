@@ -25,13 +25,17 @@
     </tr>
     @foreach (var a in Model.Almacenes)
     {
+        @* Los valores de Dapper son dynamic: hay que convertirlos a string antes de
+           pasarlos a asp-route-*, o el tag helper no los liga y el parámetro va vacío. *@
+        var alm = Fmt.S(a.Alm);
+        var fecha = Fmt.FechaInput(Model.Fecha);   // ISO en la URL, evita barras codificadas
         <tr>
-            <td><strong>@a.Alm</strong> — @a.DescAlm</td>
-            <td class="ctr"><a asp-page="CuadreCajas" asp-route-v1="@Model.Fecha" asp-route-v2="@a.Alm">Abrir</a></td>
-            <td class="ctr"><a asp-page="/Restringida/ResumenVentas" asp-route-v1="@Model.Fecha" asp-route-v2="@a.Alm">Abrir</a></td>
-            <td class="ctr"><a asp-page="/Restringida/TarjetasCredito" asp-route-v1="@Model.Fecha" asp-route-v2="@a.Alm">Abrir</a></td>
-            <td class="ctr"><a asp-page="InformeCierre" asp-route-p2="@Model.Fecha" asp-route-v2="@a.Alm">Abrir</a></td>
-            <td class="ctr"><a asp-page="InformeBalanzas" asp-route-p2="@Model.Fecha" asp-route-v2="@a.Alm">Abrir</a></td>
+            <td><strong>@alm</strong> — @a.DescAlm</td>
+            <td class="ctr"><a asp-page="CuadreCajas" asp-route-v1="@fecha" asp-route-v2="@alm">Abrir</a></td>
+            <td class="ctr"><a asp-page="/Restringida/ResumenVentas" asp-route-v1="@fecha" asp-route-v2="@alm">Abrir</a></td>
+            <td class="ctr"><a asp-page="/Restringida/TarjetasCredito" asp-route-v1="@fecha" asp-route-v2="@alm">Abrir</a></td>
+            <td class="ctr"><a asp-page="InformeCierre" asp-route-p2="@fecha" asp-route-v2="@alm">Abrir</a></td>
+            <td class="ctr"><a asp-page="InformeBalanzas" asp-route-p2="@fecha" asp-route-v2="@alm">Abrir</a></td>
         </tr>
     }
 </table>

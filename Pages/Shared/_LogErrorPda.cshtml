@@ -8,8 +8,10 @@
     </tr>
     @foreach (var r in Model)
     {
+        @* dynamic -> string, si no el tag helper no liga el valor de asp-route-* *@
+        var equipo = Fmt.S(r.Equipo);
         <tr class="tabla">
-            <td><a class="tablaMedianoAzul" asp-page="/Informatica/LogErrorPda" asp-route-p2="@r.Equipo">@r.Equipo</a></td>
+            <td><a class="tablaMedianoAzul" asp-page="/Informatica/LogErrorPda" asp-route-p2="@equipo">@equipo</a></td>
             <td class="tablaMedianoAzul">@r.FechaHora</td>
             <td class="tablamediano">@r.Texto</td>
         </tr>

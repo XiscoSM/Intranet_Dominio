@@ -105,17 +105,22 @@
             </tr>
             @foreach (var r in Model.Resumen)
             {
+                @* Dapper devuelve dynamic: convertir a string antes de pasarlo a asp-route-*,
+                   o el tag helper no liga el valor y el parámetro llega vacío. *@
                 var alerta = Fmt.D(r.Alert) > 0;
+                var oper = Fmt.S(r.OperNo);
+                var term = Fmt.S(r.TermNo);
+                var fecha = Fmt.FechaInput(Model.V1);   // ISO en la URL
                 <tr style="@(alerta ? "border:2px solid #FF0000" : "")">
-                    <td>@r.OperNo - @r.DescOperNo</td>
-                    <td class="ctr">@r.TermNo</td>
+                    <td>@oper - @r.DescOperNo</td>
+                    <td class="ctr">@term</td>
                     <td class="ctr">@r.TipoTicket</td>
                     <td class="num">@r.Tickets Tickets. @r.Prods Prods. @Fmt.N2(r.Importe)</td>
-                    <td class="ctr"><a asp-page="/Restringida/Tickets" asp-route-v1="@Model.V1" asp-route-v2="@Model.V2" asp-route-v3="@r.OperNo" asp-route-v4="6">Devol.</a></td>
-                    <td class="ctr"><a asp-page="/Restringida/Tickets" asp-route-v1="@Model.V1" asp-route-v2="@Model.V2" asp-route-v3="@r.OperNo">Venta</a></td>
-                    <td class="ctr"><a href="/MADISA NET/Gestion/Cambios de pvp.asp?V1=@Model.V1&V2=@Model.V2&V3=@r.OperNo">Camb.Pvp</a></td>
-                    <td class="ctr"><a asp-page="/Restringida/Tickets" asp-route-v1="@Model.V1" asp-route-v2="@Model.V2" asp-route-v3="@r.OperNo" asp-route-v4="14" asp-route-support="@(Model.Support ? "1" : null)">Ret.</a></td>
-                    <td class="ctr"><a asp-page="/Restringida/TicketsCaja" asp-route-v1="@Model.V1" asp-route-v2="@Model.V2" asp-route-v3="@r.TermNo">Aeat</a></td>
+                    <td class="ctr"><a asp-page="/Restringida/Tickets" asp-route-v1="@fecha" asp-route-v2="@Model.V2" asp-route-v3="@oper" asp-route-v4="6">Devol.</a></td>
+                    <td class="ctr"><a asp-page="/Restringida/Tickets" asp-route-v1="@fecha" asp-route-v2="@Model.V2" asp-route-v3="@oper">Venta</a></td>
+                    <td class="ctr"><a href="/MADISA NET/Gestion/Cambios de pvp.asp?V1=@Model.V1&V2=@Model.V2&V3=@oper">Camb.Pvp</a></td>
+                    <td class="ctr"><a asp-page="/Restringida/Tickets" asp-route-v1="@fecha" asp-route-v2="@Model.V2" asp-route-v3="@oper" asp-route-v4="14" asp-route-support="@(Model.Support ? "1" : null)">Ret.</a></td>
+                    <td class="ctr"><a asp-page="/Restringida/TicketsCaja" asp-route-v1="@fecha" asp-route-v2="@Model.V2" asp-route-v3="@term" asp-route-support="@(Model.Support ? "1" : null)">Aeat</a></td>
                 </tr>
             }
         </table>
@@ -138,8 +143,8 @@
             }
         </table>
         <p class="noPrint">
-            <a asp-page="InformeCierre" asp-route-p2="@Model.V1" asp-route-v2="@Model.V2">Informe Cierre</a> &nbsp;|&nbsp;
-            <a asp-page="/Restringida/TarjetasCredito" asp-route-v1="@Model.V1" asp-route-v2="@Model.V2">Tarjetas de Crédito</a>
+            <a asp-page="InformeCierre" asp-route-p2="@Fmt.FechaInput(Model.V1)" asp-route-v2="@Model.V2">Informe Cierre</a> &nbsp;|&nbsp;
+            <a asp-page="/Restringida/TarjetasCredito" asp-route-v1="@Fmt.FechaInput(Model.V1)" asp-route-v2="@Model.V2">Tarjetas de Crédito</a>
         </p>
         <table class="informe" style="width:100%">
             <tr class="CabeceraTablas">
