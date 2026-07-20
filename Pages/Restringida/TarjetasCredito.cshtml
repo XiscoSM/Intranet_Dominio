@@ -1,0 +1,68 @@
+@page
+@model Intranet.Pages.Restringida.TarjetasCreditoModel
+@{
+    ViewData["Title"] = $"Tarjetas de Crédito {Model.V2} - {Model.V1}";
+}
+
+<div class="toolbar noPrint">
+    <button class="resaltado" onclick="history.go(-1)">Atrás</button>
+    <button class="resaltado" onclick="history.go(1)">Adelante</button>
+    <button class="resaltado" onclick="window.close()">Cerrar Ventana</button>
+</div>
+
+<p class="Estilo6">Tarjetas de Crédito &nbsp; Tienda: @Model.V2 - Fecha: @Model.V1</p>
+
+<form method="get" class="toolbar noPrint">
+    <label>Fecha <input type="date" name="v1" value="@Fmt.FechaInput(Model.V1)" /></label>
+    <label>Tienda <input type="number" name="v2" value="@Model.V2" style="width:80px" /></label>
+    <button type="submit">Consultar</button>
+</form>
+
+<div class="paneles-cols">
+
+    <div class="panel" style="width:30%">
+        <h2>Movimientos por Operación</h2>
+        <table class="informe" style="width:100%">
+            <tr class="CabeceraTablas">
+                <td>Cajero</td><td>Tipo Tarjeta</td><td>Tipo Oper.</td>
+                <td>Importe</td>
+            </tr>
+            @foreach (var r in Model.PorOperacion)
+            {
+                <tr>
+                    <td class="ctr">@r.OperNo</td>
+                    <td>@r.Tipo</td>
+                    <td class="ctr">@r.TipoOper</td>
+                    <td class="num">@Fmt.N2(r.Amount)€</td>
+                </tr>
+            }
+        </table>
+    </div>
+
+    <div class="panel" style="flex:1">
+        <h2>Detalle de Operaciones</h2>
+        <div class="tabla-wrap">
+        <table class="informe" style="width:100%">
+            <tr class="CabeceraTablas">
+                <td>Hora</td><td>Caja-Oper</td><td>Ticket</td><td>Operación</td><td>Autorización</td>
+                <td>Tarjeta</td><td>Validación</td><td>Banco</td><td>Importe</td>
+            </tr>
+            @foreach (var r in Model.Detalle)
+            {
+                <tr>
+                    <td>@r.DateTime</td>
+                    <td class="ctr">@r.TermNo-@r.OperNo</td>
+                    <td class="num">@r.Counter</td>
+                    <td class="ctr">@r.OperationNumber</td>
+                    <td class="ctr">@r.AuthorizationNumber</td>
+                    <td>@r.CardNumber</td>
+                    <td class="ctr">@r.MetodoValidacion</td>
+                    <td>@r.AuthorizationCenter-@r.CardType</td>
+                    <td class="num">@Fmt.N2(r.Amount)€.</td>
+                </tr>
+            }
+        </table>
+        </div>
+    </div>
+
+</div>

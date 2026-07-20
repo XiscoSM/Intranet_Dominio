@@ -1,0 +1,60 @@
+@page
+@model Intranet.Pages.IndexModel
+@{
+    ViewData["Title"] = "Intranet Hiper Centro";
+}
+
+<div class="hero">
+    <img src="~/images/logo.svg" alt="Hiper Centro" class="hero-logo" />
+    <h1>Intranet</h1>
+    <p>Bienvenido, @User.Identity?.Name</p>
+</div>
+
+<div class="grid-accesos">
+    <a class="acceso" href="http://192.168.1.7:81/intranettiendas/inicio.asp?V1=HM1" target="_blank">
+        <span class="icono">🏬</span>
+        <span class="nombre">Intranet Tiendas</span>
+        <span class="desc">Inventarios, pedidos y traspasos</span>
+    </a>
+    <a class="acceso" asp-page="/Contabilidad/Index">
+        <span class="icono">💶</span>
+        <span class="nombre">Madisa.Net</span>
+        <span class="desc">Cuadre de cajas y contabilidad</span>
+    </a>
+    <a class="acceso" href="/ValidarCif/ValidarCif.aspx">
+        <span class="icono">🪪</span>
+        <span class="nombre">Razón Social</span>
+        <span class="desc">Validación de CIF / DNI</span>
+    </a>
+    <a class="acceso" href="http://192.168.1.7:81/comunicadosR2/uploadR2.asp?V1=HM1" target="_blank">
+        <span class="icono">📢</span>
+        <span class="nombre">Comunicados</span>
+        <span class="desc">Avisos internos</span>
+    </a>
+    <a class="acceso" href="http://servrs/reports/browse/InformesRS">
+        <span class="icono">📊</span>
+        <span class="nombre">Power BI</span>
+        <span class="desc">Informes y cuadros de mando</span>
+    </a>
+    <a class="acceso" href="https://login.microsoftonline.com/login.srf">
+        <span class="icono">☁️</span>
+        <span class="nombre">Office 365</span>
+        <span class="desc">Correo y documentos</span>
+    </a>
+    <a class="acceso" asp-page="/Informatica/Index">
+        <span class="icono">🛠️</span>
+        <span class="nombre">Informática</span>
+        <span class="desc">Control de sistemas y soporte</span>
+    </a>
+    <a class="acceso" href="https://www.google.es">
+        <span class="icono">🔍</span>
+        <span class="nombre">Búsquedas</span>
+        <span class="desc">Google</span>
+    </a>
+</div>
+
+<footer class="pie-legal">
+    <a href="/CanalDenuncias.pdf" target="_blank">Canal Ético y Denuncias</a>
+    <a href="/Terminos de uso.pdf" target="_blank">Términos de uso y privacidad</a>
+    <a href="/InfoProteccionDatos.pdf" target="_blank">Protección de datos</a>
+</footer>

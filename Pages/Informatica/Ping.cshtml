@@ -1,0 +1,15 @@
+@page
+@model Intranet.Pages.Informatica.PingModel
+@{
+    ViewData["Title"] = "Ping";
+}
+
+<div class="paneles-cols">
+    @foreach (var (titulo, contenido) in Model.Paneles)
+    {
+        <div class="panel" style="flex:1">
+            <h2>@titulo</h2>
+            <pre class="ping">@contenido</pre>
+        </div>
+    }
+</div>

@@ -1,0 +1,31 @@
+@page
+@model Intranet.Pages.Informatica.EtiquetasModel
+@{
+    ViewData["Title"] = "Previsión Etiquetas";
+}
+
+<h2 class="Titulos">Informe de Previsión Etiquetas Navision</h2>
+
+<form method="get" class="toolbar">
+    <label>Fecha <input type="date" name="p1" value="@Model.P1" /></label>
+    <button type="submit">Consultar</button>
+</form>
+
+<table class="informe" style="width:98%">
+    <tr class="CabeceraTablas">
+        <td>Fecha</td><td>Alm</td><td>Almacén</td><td>Normal</td>
+        <td>Oferta Fin</td><td>Oferta Ini</td><td>Total</td>
+    </tr>
+    @foreach (var r in Model.Datos)
+    {
+        <tr class="tabla">
+            <td class="ctr">@Fmt.Fecha(r.Fecha)</td>
+            <td class="ctr">@r.Alm</td>
+            <td>@r.DescAlm</td>
+            <td class="ctr">@r.Normal</td>
+            <td class="ctr">@r.OfertaFin</td>
+            <td class="ctr">@r.OfertaIni</td>
+            <td class="ctr">@r.Total</td>
+        </tr>
+    }
+</table>

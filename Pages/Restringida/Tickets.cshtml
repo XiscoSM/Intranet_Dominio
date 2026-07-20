@@ -1,0 +1,104 @@
+@page
+@model Intranet.Pages.Restringida.TicketsModel
+@{
+    ViewData["Title"] = $"Tickets Cajero {Model.V3} Tienda {Model.V2} {Model.V1}";
+}
+
+<div class="toolbar noPrint">
+    <button class="resaltado" onclick="history.go(-1)">Atrás</button>
+    <button class="resaltado" onclick="history.go(1)">Adelante</button>
+    <button class="resaltado" onclick="window.close()">Cerrar Ventana</button>
+</div>
+
+<p class="Estilo26">Cajero: <strong>@Model.V3</strong> &nbsp; Tienda <strong>@Model.V2</strong> &nbsp; Fecha <strong>@Model.V1</strong></p>
+
+<table style="width:100%; border-collapse:collapse">
+@foreach (var t in Model.Tickets)
+{
+    @if (t.Cabecera is not null)
+    {
+        var c = t.Cabecera;
+        var transType = Fmt.S(c["TransType"]);
+        var autorizeNo = Fmt.S(c["AutorizeNo"]);
+        var ticketDevol = Fmt.S(c["TicketDevolucion"]);
+        var pedido = Fmt.S(c["Pedido"]);
+        var custNo = Fmt.D(c["CustNo"]);
+        <tr>
+            <td style="background-color:#f0f0f2" class="Estilo24">
+                Caja: @c["TermNo"]
+                <a title="@c["EanTicket"]">Fact.Simplif.: @c["FactSimplificada"]</a>
+                Tipo: @transType - @Fmt.Hora(c["Hora"])
+                @if (transType != "8")
+                {
+                    <span class="Estilo25"> - @c["Desc_trans_type"]</span>
+                    @if (transType == "6")
+                    {
+                        @if (ticketDevol == "0")
+                        {
+                            <span class="Estilo25"> - Falta Ticket Origen</span>
+                        }
+                        else
+                        {
+                            <text> - Ticket Devol: @ticketDevol</text>
+                        }
+                    }
+                    @if (autorizeNo == "0" || autorizeNo == Model.V3)
+                    {
+                        <span class="Estilo25"> - Sin Autorizar</span>
+                    }
+                }
+                @if (Fmt.D(autorizeNo) > 0)
+                {
+                    <text> - Autorizado por: @autorizeNo</text>
+                }
+                @if (pedido != "")
+                {
+                    <text> - Ped: @pedido</text>
+                }
+                @if (custNo > 7)
+                {
+                    <text> - Cliente: @c["CustNo"] - @c["Cliente"]</text>
+                }
+            </td>
+        </tr>
+    }
+    @foreach (var r in t.Filas)
+    {
+        var tipoReg = Fmt.S(r["TipoRegistro"]);
+        @if (tipoReg == "10producto")
+        {
+            <tr>
+                <td>
+                    <span class="@(Fmt.S(r["TransTypeNo"]) == "0" ? "Estilo24" : "Estilo25")">
+                        @Fmt.Pad(r["ItemNo"], 13, false)@Fmt.Pad(r["Quantity"], 6, true) u.@Fmt.Pad(r["TruePrice"], 6, true)€. @Fmt.Pad(r["Amount"], 10, true) €. _ @r["DescProd"]
+                    </span>
+                </td>
+            </tr>
+            @if (Fmt.S(r["DescCambioPvp"]) != "")
+            {
+                <tr><td><span class="Estilo25">Razón Cambio Pvp: @r["DescCambioPvp"]</span></td></tr>
+            }
+        }
+        else if (tipoReg == "30pago")
+        {
+            <tr>
+                <td class="num Estilo24">
+                    @if (Fmt.S(r["Cambio"]) == "1")
+                    {
+                        <text>Cambio: @r["Importe"]€.</text>
+                    }
+                    else
+                    {
+                        <text>@r["formapago"]: @r["Importe"]€.</text>
+                    }
+                </td>
+            </tr>
+        }
+    }
+    <tr>
+        <td class="num Estilo24" style="border-bottom:1px solid #d2d2d7; padding-bottom:6px">
+            Importe sin Dto: @Fmt.N2(t.TotalSinDto) €. - Total: <strong>@Fmt.N2(t.TotalTicket) €.</strong>
+        </td>
+    </tr>
+}
+</table>

@@ -1,0 +1,82 @@
+@page
+@model Intranet.Pages.Contabilidad.InformeCierreModel
+@{
+    ViewData["Title"] = $"Informe Cierre Cajas {Model.Almacen} {Model.P2}";
+}
+
+<div class="toolbar noPrint">
+    <button class="resaltado" onclick="history.go(-1)">Atrás</button>
+    <button class="resaltado" onclick="history.go(1)">Adelante</button>
+    <button class="resaltado" onclick="window.close()">Cerrar Ventana</button>
+</div>
+
+<p class="Estilo6">Informe Cierre Cajas @Model.Almacen &nbsp; Fecha: @Model.P2</p>
+
+@if (Model.TefFirma.Count > 0)
+{
+    <table class="informe">
+        <tr class="CabeceraTablas">
+            <td>Cajero</td><td>Total Tarjetas Firma</td>
+        </tr>
+        @foreach (var r in Model.TefFirma)
+        {
+            <tr class="tablamediano">
+                <td>@r.OperNo - @r.Operador</td>
+                <td class="ctr Negrita">@r.NumTarjetas</td>
+            </tr>
+        }
+    </table>
+}
+
+@if (Model.Seccion.Count > 0)
+{
+    <p class="Titulos">CALZADO</p>
+    <table class="informe">
+        <tr class="CabeceraTablas">
+            <td>Cajero</td><td>Producto</td><td>Unidades</td><td>Importe</td>
+        </tr>
+        @foreach (var r in Model.Seccion)
+        {
+            <tr class="Estilo8">
+                <td>@r.OperatorNo-@r.Description</td>
+                <td>@r.ItemNo - @r.descripcion</td>
+                <td class="ctr">@r.cant u.</td>
+                <td class="num">@r.importe €</td>
+            </tr>
+        }
+    </table>
+}
+
+@if (Model.CambiosPvp.Count > 0)
+{
+    <p class="Titulos">CAMBIOS DE PVP - VENTA A VARIOS - COBROS A CUENTA</p>
+    <div class="tabla-wrap">
+    <table class="informe">
+        <tr class="CabeceraTablas">
+            <td>Cajero</td><td>Autorizador</td><td>Caja</td><td>Hora</td><td>Descripción</td>
+            <td>Cant.</td><td>Pvp N</td><td>PVP</td><td>Motivo</td><td>Total</td>
+        </tr>
+        @foreach (var r in Model.CambiosPvp)
+        {
+            <tr class="Estilo8">
+                <td>@r.OperNo- @r.Operador</td>
+                <td>
+                    @r.Autorizado
+                    @if (Fmt.S(r.Alert) != "")
+                    {
+                        <span class="tablaMedianoRojo">(@r.Alert)</span>
+                    }
+                </td>
+                <td class="ctr">@r.Caja</td>
+                <td class="ctr">@Fmt.Hora(r.FechaHora)</td>
+                <td>@r.DescProd</td>
+                <td class="num">@r.Cantidad</td>
+                <td class="num Estilo2">@r.Precio2 €.</td>
+                <td class="num celda-gris">@r.Precio €.</td>
+                <td>@r.DescMotiv</td>
+                <td class="num">@r.Importe €.</td>
+            </tr>
+        }
+    </table>
+    </div>
+}

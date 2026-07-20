@@ -1,0 +1,35 @@
+@page
+@model Intranet.Pages.Contabilidad.InformeBalanzasModel
+@{
+    ViewData["Title"] = $"Informe Balanzas {Model.Almacen} {Model.P2}";
+}
+
+<div class="toolbar noPrint">
+    <button class="resaltado" onclick="history.go(-1)">Atrás</button>
+    <button class="resaltado" onclick="history.go(1)">Adelante</button>
+    <button class="resaltado" onclick="window.close()">Cerrar Ventana</button>
+</div>
+
+<p class="Estilo6">Informe Balanzas @Model.Almacen &nbsp; Fecha: @Model.P2</p>
+<p class="Titulos">BALANZAS</p>
+
+@if (Model.Balanzas.Count > 0)
+{
+    <table class="informe">
+        <tr class="CabeceraTablas">
+            <td>Sección</td><td>Venta</td><td>Dto</td>
+        </tr>
+        @foreach (var r in Model.Balanzas)
+        {
+            <tr class="Estilo8">
+                <td>@r.seccion (@r.Tecla)</td>
+                <td class="num">@r.Venta €</td>
+                <td class="num">@r.Dto €</td>
+            </tr>
+        }
+    </table>
+}
+else
+{
+    <p class="normal">Sin datos para la fecha indicada.</p>
+}

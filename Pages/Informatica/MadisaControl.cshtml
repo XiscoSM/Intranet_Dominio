@@ -1,0 +1,20 @@
+@page
+@model Intranet.Pages.Informatica.MadisaControlModel
+@{
+    ViewData["Title"] = "Madisa Control";
+}
+
+<div class="paneles">
+    <div class="panel">
+        <h2>Sincronización - última venta</h2>
+        <partial name="_TransRecibidas" model="Model.TransRecibidas" />
+    </div>
+    <div class="panel">
+        <h2>Alertas</h2>
+        <partial name="_Alertas" model="Model.Alertas" />
+    </div>
+    <div class="panel">
+        <h2>Carga de ventas</h2>
+        <partial name="_CargaVentas" model="Model.CargaVentas" />
+    </div>
+</div>

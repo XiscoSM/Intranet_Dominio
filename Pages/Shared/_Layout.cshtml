@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>@(ViewData["Title"] ?? "Intranet Hiper Centro")</title>
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="icon" type="image/svg+xml" href="~/images/logo.svg" />
+</head>
+<body>
+    <header class="topbar noPrint">
+        <a class="brand" asp-page="/Index" aria-label="Hiper Centro">
+            <img src="~/images/logo.svg" alt="Hiper Centro" />
+        </a>
+        <nav>
+            <a asp-page="/Contabilidad/Index">Cuadre Cajas</a>
+            <a asp-page="/Restringida/ResumenVentas">Ventas</a>
+            <a asp-page="/Informatica/Index">Informática</a>
+            <a asp-page="/Informatica/ControlGeneral">Control General</a>
+        </nav>
+        <span class="user">@User.Identity?.Name</span>
+    </header>
+    <main class="contenido">
+        @RenderBody()
+    </main>
+</body>
+</html>

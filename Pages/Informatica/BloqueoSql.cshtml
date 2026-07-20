@@ -1,0 +1,32 @@
+@page
+@model Intranet.Pages.Informatica.BloqueoSqlModel
+@{
+    ViewData["Title"] = "Bloqueos SQL";
+}
+
+<h2 class="Titulos">Bloqueos SQL</h2>
+
+<div class="tabla-wrap">
+<table class="informe" style="width:100%">
+    <tr class="CabeceraTablas">
+        <td>PC</td><td>App</td><td>Usuario</td><td>Ip</td>
+        <td>PC Bloqueado</td><td>App Bloqueado</td><td>User Bloqueado</td>
+        <td>Tiempo Bloq (seg)</td><td>Sentencia Sql</td><td>Sentencia Sql 2</td>
+    </tr>
+    @foreach (var r in Model.Datos)
+    {
+        <tr class="tablamediano">
+            <td>@r.PC</td>
+            <td>@r.App</td>
+            <td>@r.Usuario</td>
+            <td>@r.Ip</td>
+            <td>@r.PC_Bloqueado</td>
+            <td>@r.App_Bloqueado</td>
+            <td>@r.Usuario_Bloqueado</td>
+            <td class="ctr">@r.TiempoBloqSeg</td>
+            <td>@r.SentenciaSql</td>
+            <td>@r.SentenciaSql2</td>
+        </tr>
+    }
+</table>
+</div>

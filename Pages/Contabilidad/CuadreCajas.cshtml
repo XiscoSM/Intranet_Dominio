@@ -1,0 +1,160 @@
+@page
+@model Intranet.Pages.Contabilidad.CuadreCajasModel
+@{
+    ViewData["Title"] = $"Cuadre Cajas {Model.V1} Tienda {Model.V2}";
+}
+
+<div class="toolbar noPrint">
+    <button class="resaltado" onclick="history.go(-1)">Atrás</button>
+    <button class="resaltado" onclick="history.go(1)">Adelante</button>
+    <button class="resaltado" onclick="window.print()">Imprimir</button>
+    <button class="resaltado" onclick="window.close()">Cerrar</button>
+</div>
+
+<p class="Estilo6">Cuadre Cajas &nbsp; Fecha: <strong>@Model.V1</strong> &nbsp; Tienda: <strong>@Model.V2</strong></p>
+
+<form method="get" class="toolbar noPrint">
+    <label>Fecha <input type="date" name="v1" value="@Fmt.FechaInput(Model.V1)" /></label>
+    <label>Tienda <input type="number" name="v2" value="@Model.V2" style="width:80px" /></label>
+    <button type="submit">Consultar</button>
+</form>
+
+<div class="tabla-wrap">
+<table class="informe" style="width:100%">
+    <tr class="CabeceraTablas">
+        <td>Tienda-Operador</td>
+        <td class="celda-gris">Efectivo Teorico</td>
+        <td class="Estilo2">Entrada</td>
+        <td class="Estilo2">Retirada</td>
+        <td>Efectivo declarado</td>
+        <td>Pago</td>
+        <td class="celda-gris">Dataf.Visa Teorico</td>
+        <td>Dataf.Visa Declarado</td>
+        <td class="celda-gris">Dataf.Otros Teorico</td>
+        <td>Dataf.Otros Declar.</td>
+        <td>Tef Declar.</td>
+        <td>Just. Teoric</td>
+        <td>Just. Declar.</td>
+        <td class="celda-gris">Cred. Teoric</td>
+        <td>Cred. Declar.</td>
+        <td class="celda-gris">Cupones Teorico</td>
+        <td>Cupones Declar.</td>
+        <td class="celda-gris">Total Teorico</td>
+        <td>Total Declar.</td>
+        <td class="celda-gris">Diferencia</td>
+    </tr>
+@foreach (var l in Model.Lineas)
+{
+    <tr>
+        <td>@l.Tienda-<a title="@l.Nombre">@l.Operador</a></td>
+        <td class="num celda-gris">@Fmt.N2(l.Et)</td>
+        <td class="num Estilo2">@Fmt.N2(l.Entrada)</td>
+        <td class="num Estilo2">@Fmt.N2(l.Ret)</td>
+        <td class="num">@Fmt.N2(l.Ed)</td>
+        <td class="num @(l.TextoPago != "" ? "celda-roja" : "")"><a title="@l.TextoPago">@Fmt.N2(l.Pg)</a></td>
+        <td class="num celda-gris">@Fmt.N2(l.D1t)</td>
+        <td class="num"><a title="@l.TextoDat">@Fmt.N2(l.D1d)</a></td>
+        <td class="num celda-gris"><a title="@l.TextoDat">@Fmt.N2(l.D2t)</a></td>
+        <td class="num"><a title="@l.TextoDat">@Fmt.N2(l.D2d)</a></td>
+        <td class="num"><a title="@l.TextoTef">@Fmt.N2(l.Td)</a></td>
+        <td class="num @(l.Jt == l.Jd ? "" : "celda-roja")"><a title="Just.:@l.Jt PayGold:@l.Pgrt">@Fmt.N2(l.Jt + l.Pgrt)</a></td>
+        <td class="num @(l.Pgrt == l.Pgrd ? (l.Pgrt != 0 ? "celda-ambar" : "") : "celda-roja")"><a title="Just.:@l.Jd PayGold:@l.Pgrd">@Fmt.N2(l.Jd + l.Pgrd)</a></td>
+        <td class="num celda-gris">@Fmt.N2(l.Ct)</td>
+        <td class="num">@Fmt.N2(l.Cd)</td>
+        <td class="num celda-gris">@Fmt.N2(l.Gt)</td>
+        <td class="num"><a title="@l.TextoCupon">@Fmt.N2(l.Gd)</a></td>
+        <td class="num celda-gris"><strong>@Fmt.N2(l.TotalTeorico)</strong></td>
+        <td class="num"><strong>@Fmt.N2(l.TotalDeclarado)</strong></td>
+        <td class="num celda-gris"><strong>@Fmt.N2(l.Diferencia)</strong></td>
+    </tr>
+}
+    @{ var t = Model.Totales; }
+    <tr style="border:2px solid #0000FF" class="Negrita">
+        <td>TOTAL</td>
+        <td class="num celda-gris">@Fmt.N2(t.Et)</td>
+        <td class="num">@Fmt.N2(t.Entrada)</td>
+        <td class="num">@Fmt.N2(t.Ret)</td>
+        <td class="num">@Fmt.N2(t.Ed)</td>
+        <td class="num">@Fmt.N2(t.Pg)</td>
+        <td class="num celda-gris">@Fmt.N2(t.D1t)</td>
+        <td class="num">@Fmt.N2(t.D1d)</td>
+        <td class="num celda-gris">@Fmt.N2(t.D2t)</td>
+        <td class="num">@Fmt.N2(t.D2d)</td>
+        <td class="num">@Fmt.N2(t.Td)</td>
+        <td class="num">@Fmt.N2(t.Jt + t.Pgrt)</td>
+        <td class="num">@Fmt.N2(t.Jd + t.Pgrd)</td>
+        <td class="num celda-gris">@Fmt.N2(t.Ct)</td>
+        <td class="num">@Fmt.N2(t.Cd)</td>
+        <td class="num celda-gris">@Fmt.N2(t.Gt)</td>
+        <td class="num">@Fmt.N2(t.Gd)</td>
+        <td class="num celda-gris">@Fmt.N2(t.TotalTeorico)</td>
+        <td class="num">@Fmt.N2(t.TotalDeclarado)</td>
+        <td class="num celda-gris Estilo1">@Fmt.N2(t.Diferencia)</td>
+    </tr>
+</table>
+</div>
+
+<div class="paneles-cols" style="margin-top:14px">
+
+    <div class="panel noPrint" style="flex:1">
+        <h2>Resumen Cajero</h2>
+        <table class="informe" style="width:100%">
+            <tr class="CabeceraTablas">
+                <td>Cajero</td><td>Caja</td><td>Tipo Ticket</td><td>Importe</td>
+                <td>Devol.</td><td>Venta</td><td>Camb.Pvp</td><td>Ret.</td><td>Aeat</td>
+            </tr>
+            @foreach (var r in Model.Resumen)
+            {
+                var alerta = Fmt.D(r.Alert) > 0;
+                <tr style="@(alerta ? "border:2px solid #FF0000" : "")">
+                    <td>@r.OperNo - @r.DescOperNo</td>
+                    <td class="ctr">@r.TermNo</td>
+                    <td class="ctr">@r.TipoTicket</td>
+                    <td class="num">@r.Tickets Tickets. @r.Prods Prods. @Fmt.N2(r.Importe)</td>
+                    <td class="ctr"><a asp-page="/Restringida/Tickets" asp-route-v1="@Model.V1" asp-route-v2="@Model.V2" asp-route-v3="@r.OperNo" asp-route-v4="6">Devol.</a></td>
+                    <td class="ctr"><a asp-page="/Restringida/Tickets" asp-route-v1="@Model.V1" asp-route-v2="@Model.V2" asp-route-v3="@r.OperNo">Venta</a></td>
+                    <td class="ctr"><a href="/MADISA NET/Gestion/Cambios de pvp.asp?V1=@Model.V1&V2=@Model.V2&V3=@r.OperNo">Camb.Pvp</a></td>
+                    <td class="ctr"><a asp-page="/Restringida/Tickets" asp-route-v1="@Model.V1" asp-route-v2="@Model.V2" asp-route-v3="@r.OperNo" asp-route-v4="14" asp-route-support="@(Model.Support ? "1" : null)">Ret.</a></td>
+                    <td class="ctr"><a asp-page="/Restringida/TicketsCaja" asp-route-v1="@Model.V1" asp-route-v2="@Model.V2" asp-route-v3="@r.TermNo">Aeat</a></td>
+                </tr>
+            }
+        </table>
+    </div>
+
+    <div class="panel" style="flex:1">
+        <h2>Tarjetas</h2>
+        <table class="informe" style="width:100%">
+            <tr class="CabeceraTablas">
+                <td>Tipo Tarjeta</td><td>Teórico</td><td>Declarado</td><td>Diferencia</td>
+            </tr>
+            @foreach (var r in Model.Tarjetas)
+            {
+                <tr>
+                    <td>@r.Tipo-@r.DescPago</td>
+                    <td class="num">@Fmt.N2(r.Teorico)</td>
+                    <td class="num">@Fmt.N2(r.Declarado)</td>
+                    <td class="num celda-gris Negrita">@Fmt.N2(Fmt.D(r.Declarado) - Fmt.D(r.Teorico))</td>
+                </tr>
+            }
+        </table>
+        <p class="noPrint">
+            <a asp-page="InformeCierre" asp-route-p2="@Model.V1" asp-route-v2="@Model.V2">Informe Cierre</a> &nbsp;|&nbsp;
+            <a asp-page="/Restringida/TarjetasCredito" asp-route-v1="@Model.V1" asp-route-v2="@Model.V2">Tarjetas de Crédito</a>
+        </p>
+        <table class="informe" style="width:100%">
+            <tr class="CabeceraTablas">
+                <td>Banco</td><td>Tipo</td><td>Tipo Oper.</td><td>Importe</td>
+            </tr>
+            @foreach (var r in Model.TarjetasTef)
+            {
+                <tr>
+                    <td>@r.CentroAuto</td>
+                    <td class="ctr">@r.Tipo</td>
+                    <td class="ctr">@r.TipoOper</td>
+                    <td class="num">@Fmt.N2(r.Amount)</td>
+                </tr>
+            }
+        </table>
+    </div>
+
+</div>

@@ -1,0 +1,16 @@
+@model List<dynamic>
+@* Alertas de cajas (rep.Alertas) — antes MadisaTransaccion.asp *@
+<table class="informe" style="width:98%">
+    <tr class="CabeceraTablas">
+        <td>Alerta</td><td>Alm</td><td>Caja</td><td>Observación</td>
+    </tr>
+    @foreach (var r in Model)
+    {
+        <tr class="tablamediano">
+            <td>@r.DescAlerta</td>
+            <td class="ctr">@r.Alm</td>
+            <td class="ctr">@r.Caja</td>
+            <td>@r.Texto</td>
+        </tr>
+    }
+</table>

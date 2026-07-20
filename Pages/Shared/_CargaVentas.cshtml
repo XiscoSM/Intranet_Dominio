@@ -1,0 +1,20 @@
+@model List<dynamic>
+@* Estado de la carga de ventas (rep.CargaVentas_Select) — antes MadisaCargaVentas.asp *@
+<table class="informe" style="width:75%">
+    <tr class="CabeceraTablas">
+        <td style="width:10%">Fecha Carga</td>
+        <td style="width:10%">Fecha</td>
+        <td style="width:5%"><a asp-page="/Informatica/CargaVentas" asp-route-p1="1">Alm</a></td>
+        <td></td>
+    </tr>
+    @foreach (var r in Model)
+    {
+        var error = Fmt.D(r.Error) != 0;
+        <tr class="@(error ? "tablamedianoRojo" : "tablamediano")">
+            <td class="ctr">@r.FechaCarga</td>
+            <td class="ctr">@r.FechaNum</td>
+            <td class="num">@r.Alm</td>
+            <td>@r.DescError</td>
+        </tr>
+    }
+</table>

@@ -1,0 +1,16 @@
+@model List<dynamic>
+@* Sincronización: hora de última venta por almacén (rep.TransRecibidas) — antes MadisaSinc.asp *@
+<table class="informe" style="width:98%">
+    <tr class="CabeceraTablas">
+        <td>Alm</td><td>Almacén</td><td>Hora Ultima Venta</td><td>Minutos</td>
+    </tr>
+    @foreach (var r in Model)
+    {
+        <tr class="tablamediano">
+            <td class="ctr">@r.Alm</td>
+            <td>@r.DescAlm</td>
+            <td class="ctr">@r.HoraUltVenta</td>
+            <td class="ctr">@r.MinDif</td>
+        </tr>
+    }
+</table>

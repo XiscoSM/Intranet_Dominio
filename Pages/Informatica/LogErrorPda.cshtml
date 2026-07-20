@@ -1,0 +1,7 @@
+@page
+@model Intranet.Pages.Informatica.LogErrorPdaModel
+@{
+    ViewData["Title"] = "Log Error Pda";
+}
+<h2 class="Titulos">Log Error Pda @(Model.P2 != "" ? $"— {Model.P2}" : "")</h2>
+<partial name="_LogErrorPda" model="Model.Datos" />

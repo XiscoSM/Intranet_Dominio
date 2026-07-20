@@ -1,0 +1,17 @@
+@model List<dynamic>
+@* Log de errores de PDA (asp.ErrorLogPda) — antes LogErrorPda.asp *@
+<table class="informe" style="width:90%">
+    <tr class="CabeceraTablas">
+        <td style="width:8%">Equipo</td>
+        <td style="width:10%">Fecha Hora</td>
+        <td>Log Pda Error</td>
+    </tr>
+    @foreach (var r in Model)
+    {
+        <tr class="tabla">
+            <td><a class="tablaMedianoAzul" asp-page="/Informatica/LogErrorPda" asp-route-p2="@r.Equipo">@r.Equipo</a></td>
+            <td class="tablaMedianoAzul">@r.FechaHora</td>
+            <td class="tablamediano">@r.Texto</td>
+        </tr>
+    }
+</table>

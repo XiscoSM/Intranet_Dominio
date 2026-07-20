@@ -1,0 +1,103 @@
+@page
+@model Intranet.Pages.Informatica.IndexModel
+@{
+    ViewData["Title"] = "Intranet Informática";
+}
+
+<div class="hero" style="padding-top:18px">
+    <h1>Informática</h1>
+    <p>Empresa @Model.Empresa · Almacén @Model.Almacen — @Model.DescAlm</p>
+</div>
+
+<div class="paneles-cols" style="justify-content:center; margin-bottom:6px">
+    <form action="/IntranetTiendas/Producto.asp" method="get" target="_blank" class="panel" style="display:flex; gap:8px; align-items:center">
+        <label>EAN <input name="P2" size="14" maxlength="13" /></label>
+        <label>Producto <input name="P1" size="8" maxlength="8" /></label>
+        <button type="submit">Buscar</button>
+    </form>
+    <form method="get" class="panel" style="display:flex; gap:8px; align-items:center">
+        <label>Tienda
+            <select name="v2">
+                <option value="@Model.Almacen" selected>@Model.Almacen-@Model.DescAlm</option>
+                @foreach (var a in Model.Almacenes)
+                {
+                    <option value="@a.Alm">@a.Alm-@a.DescAlm</option>
+                }
+            </select>
+        </label>
+        <button type="submit">Cambiar</button>
+    </form>
+</div>
+
+<div class="grid-accesos">
+    <a class="acceso" asp-page="MadisaControl" target="_blank">
+        <span class="icono">🌅</span><span class="nombre">Control Mañana</span>
+        <span class="desc">Sincronización, alertas y carga de ventas</span>
+    </a>
+    <a class="acceso" asp-page="ControlGeneral" target="_blank">
+        <span class="icono">🖥️</span><span class="nombre">Control General</span>
+        <span class="desc">Estado global de los sistemas</span>
+    </a>
+    <a class="acceso" asp-page="BloqueoSql">
+        <span class="icono">🔒</span><span class="nombre">Bloqueos SQL</span>
+        <span class="desc">Procesos bloqueados en SQL Server</span>
+    </a>
+    <a class="acceso" href="/Informatica/Comunicados.asp">
+        <span class="icono">📢</span><span class="nombre">Comunicados</span>
+        <span class="desc">Avisos a tiendas</span>
+    </a>
+    <a class="acceso" asp-page="Etiquetas">
+        <span class="icono">🏷️</span><span class="nombre">Etiquetas</span>
+        <span class="desc">Previsión de etiquetas Navision</span>
+    </a>
+    <a class="acceso" asp-page="LogErrorPda">
+        <span class="icono">📟</span><span class="nombre">Log Error Pda</span>
+        <span class="desc">Errores de los terminales PDA</span>
+    </a>
+    <a class="acceso" asp-page="HorarioSinc">
+        <span class="icono">⏱️</span><span class="nombre">Control Horario</span>
+        <span class="desc">Última sincronización por equipo</span>
+    </a>
+    <a class="acceso" asp-page="Ping">
+        <span class="icono">📡</span><span class="nombre">Ping</span>
+        <span class="desc">Disponibilidad de equipos</span>
+    </a>
+    <a class="acceso" asp-page="Sinc">
+        <span class="icono">🔄</span><span class="nombre">Sincronización</span>
+        <span class="desc">Última venta por almacén</span>
+    </a>
+    <a class="acceso" asp-page="Alertas">
+        <span class="icono">⚠️</span><span class="nombre">Alertas</span>
+        <span class="desc">Alertas de cajas</span>
+    </a>
+    <a class="acceso" asp-page="CargaVentas">
+        <span class="icono">📥</span><span class="nombre">Carga Ventas</span>
+        <span class="desc">Estado de la carga diaria</span>
+    </a>
+    <a class="acceso" asp-page="CajasFueraLinea">
+        <span class="icono">🚫</span><span class="nombre">Cajas fuera de línea</span>
+        <span class="desc">Cajas sin sincronizar</span>
+    </a>
+</div>
+
+<h2 style="font-size:15px; color:var(--text-2)">Intranet Tiendas</h2>
+<p class="normal">
+    <a href="/IntranetTiendas/InventarioCab.asp">Inventarios</a> ·
+    <a href="/IntranetTiendas/ComprasCab.asp">Albaranes</a> ·
+    <a href="/IntranetTiendas/PedidosCompraCab.asp">Pedidos Proveedor</a> ·
+    <a href="/IntranetTiendas/PedidosCentralDirecto.asp">Pedidos Centro Dist.</a> ·
+    <a href="/IntranetTiendas/TraspasosCab.asp">Traspasos</a> ·
+    <a href="/IntranetTiendas/InformeManualCab.asp">Listados</a> ·
+    <a href="/IntranetTiendas/informe cierre.asp">Informe Cierre</a> ·
+    <a href="/IntranetTiendas/AjustesCab.asp">Ajustes</a>
+</p>
+
+<h2 style="font-size:15px; color:var(--text-2); margin-top:18px">Descargas</h2>
+<p class="normal">
+    <a href="/Descargas/PcRw.rar">PcRw.rar</a> ·
+    <a href="/Descargas/PerFex.rar">PerFex.rar</a> ·
+    <a href="/Descargas/Facturas.rar">Facturas.rar</a> ·
+    <a href="/Descargas/pocket_rar.cab">pocket_rar.cab</a>
+</p>
+
+<p class="info_pequeno" style="margin-top:24px">Para cualquier incidencia contacte con el departamento de informática.</p>

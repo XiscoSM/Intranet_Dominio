@@ -1,0 +1,38 @@
+@page
+@model Intranet.Pages.Informatica.ControlGeneralModel
+@{
+    ViewData["Title"] = "Control General";
+}
+
+<div class="paneles">
+    <div class="panel">
+        <p class="normal" style="margin:0">
+            Número de Cajas fuera de Línea o no sincronizadas:
+            <span class="Estilo1">@Model.CajasFueraLinea</span>
+        </p>
+    </div>
+    <div class="panel">
+        <h2>Alertas</h2>
+        <partial name="_Alertas" model="Model.Alertas" />
+    </div>
+    <div class="panel">
+        <h2>Control horario - última sincronización</h2>
+        <partial name="_HorarioSinc" model="Model.HorarioSinc" />
+    </div>
+    <div class="panel">
+        <h2>Ping</h2>
+        <div class="paneles-cols">
+            @foreach (var (titulo, contenido) in Model.Ping)
+            {
+                <div style="flex:1; min-width:200px">
+                    <h2>@titulo</h2>
+                    <pre class="ping">@contenido</pre>
+                </div>
+            }
+        </div>
+    </div>
+    <div class="panel">
+        <h2>Log Error Pda</h2>
+        <partial name="_LogErrorPda" model="Model.LogErrorPda" />
+    </div>
+</div>

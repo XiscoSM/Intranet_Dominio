@@ -1,0 +1,54 @@
+@page
+@model Intranet.Pages.Restringida.ResumenVentasModel
+@{
+    ViewData["Title"] = $"Ventas Tienda {Model.V2} - {Model.V1}";
+}
+
+<div class="toolbar noPrint">
+    <button class="resaltado" onclick="history.go(-1)">Atrás</button>
+    <button class="resaltado" onclick="history.go(1)">Adelante</button>
+    <button class="resaltado" onclick="window.print()">Imprimir</button>
+    <button class="resaltado" onclick="window.close()">Cerrar Ventana</button>
+</div>
+
+<p class="Estilo6">Ventas Tienda: @Model.V2 - Fecha: @Model.V1</p>
+
+<form method="get" class="toolbar noPrint">
+    <label>Fecha <input type="date" name="v1" value="@Fmt.FechaInput(Model.V1)" /></label>
+    <label>Tienda <input type="number" name="v2" value="@Model.V2" style="width:80px" /></label>
+    <button type="submit">Consultar</button>
+</form>
+
+<table class="informe">
+    <tr class="CabeceraTablas">
+        <td>Programa</td><td>Importe</td><td>Nº Tickets</td><td>Nº Productos</td>
+    </tr>
+    @foreach (var r in Model.Ventas)
+    {
+        <tr>
+            <td class="Estilo8">@r.DescProg</td>
+            <td class="num Estilo8">@Fmt.N2(r.Importe) €.</td>
+            <td class="Estilo19">@r.Ticks</td>
+            <td class="Estilo19">@r.Prods</td>
+        </tr>
+    }
+    <tr class="CabeceraTablas">
+        <td></td>
+        <td class="num">@Fmt.N2(Model.Total) €.</td>
+        <td class="ctr Negrita">@Model.NumTickets</td>
+        <td class="ctr">@Model.TotalProductos</td>
+    </tr>
+</table>
+
+<p class="Estilo8 Estilo17">
+    Estadísticas: Nº tickets: <strong>@Model.NumTickets</strong>
+    - Productos Vendidos: <strong>@Model.TotalProductos</strong>
+    @if (Model.NumTickets > 0)
+    {
+        <text>
+        - Productos por Ticket: <strong>@Fmt.N2(Model.TotalProductos / Model.NumTickets)</strong>
+        - Importe medio por Ticket: <strong>@Fmt.N2(Model.Total / Model.NumTickets) €.</strong>
+        </text>
+    }
+    - Total Venta: <strong>@Fmt.N2(Model.Total) €.</strong>
+</p>

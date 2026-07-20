@@ -1,0 +1,16 @@
+@model List<dynamic>
+@* Sincronización del control horario (asp.Info_SincControlHorario) — antes HorarioSinc.asp *@
+<table class="informe" style="width:98%">
+    <tr class="CabeceraTablas">
+        <td>Alm</td><td>Almacén</td><td>Equipo</td><td>Control Horario Ultima Sinc</td>
+    </tr>
+    @foreach (var r in Model)
+    {
+        <tr class="tabla">
+            <td class="ctr">@r.Alm</td>
+            <td>@r.DescAlm</td>
+            <td class="ctr">@r.Equipo</td>
+            <td>@r.HoraSinc</td>
+        </tr>
+    }
+</table>
