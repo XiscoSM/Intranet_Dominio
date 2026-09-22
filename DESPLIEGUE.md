@@ -9,7 +9,8 @@ manteniendo autenticación Windows (usuario de dominio) y autorización por grup
 |-----------------------------------------------------|------------------------------------------|
 | `default.asp`                                       | `/` (Pages/Index)                        |
 | `MadisaNetR2/Contabilidad/CuadreCajasResum.asp` (*) | `/Contabilidad` (selector fecha/tienda)  |
-| `MadisaNetR2/Contabilidad/CuadreCajasList.asp`      | `/Contabilidad/CuadreCajas`              |
+| `MadisaNetR2/Contabilidad/CuadreCajasList.asp`      | `/Contabilidad/CuadreCajas` (port fiel)  |
+| — (rediseño del cuadre, en pruebas)                 | `/Contabilidad/Cuadre`                   |
 | `MadisaNetR2/Contabilidad/Informe Balanzas.asp`     | `/Contabilidad/InformeBalanzas`          |
 | `MadisaNetR2/Contabilidad/Informe Cierre.asp`       | `/Contabilidad/InformeCierre`            |
 | `MadisaNetR2/Restringida/ResumenVentas.asp`         | `/Restringida/ResumenVentas`             |
@@ -113,6 +114,23 @@ dotnet run          # http://localhost:5080
 
 9. **Transición**: redirigir cada `.asp` viejo a su página nueva (o sustituir los enlaces).
    Cuando no quede ningún `.asp` en uso: retirar WebKnight, los DSN ODBC y el sitio clásico.
+
+## Nuevo cuadre de cajas (`/Contabilidad/Cuadre`)
+
+Rediseño basado en una semana de datos reales (15–21/09/26, 234 tienda-días) y en una
+auditoría de usabilidad. Usa los mismos stored procedures y da los mismos totales que
+`/Contabilidad/CuadreCajas` (verificado al céntimo en 10 tienda-días), que se mantiene sin cambios.
+
+- Cabecera con día anterior/siguiente y tienda anterior/siguiente (solo tiendas con cierres ese día,
+  vía `rep.CuadreCajas_Resum`). Por defecto muestra el día de ayer.
+- KPIs: teórico, declarado, diferencia de la tienda y cajeros a revisar.
+- Avisos solo cuando hay algo: descuadres compensados entre cajeros, datáfonos que no cuadran,
+  devoluciones sin ticket original (`Alert = 2` de `rep.CuadreCajas_ResumCajero`; `Alert = 1`
+  solo indica que el cajero es responsable y se muestra como etiqueta neutra).
+- Tabla de 7 columnas ordenada por |diferencia|; detalle expandible por cajero (desglose por forma
+  de pago sin ceros, cálculo del efectivo, actividad por caja y accesos a tickets) en lugar de tooltips.
+- Umbrales configurables en `appsettings.json` → `Cuadre:Tolerancia` (1 €) y `Cuadre:Descuadre` (20 €).
+  Valores propuestos a partir de los datos: el 73 % de los cajeros descuadra < 1 € y el 97 % < 20 €.
 
 ## Notas
 

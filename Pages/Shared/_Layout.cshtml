@@ -6,6 +6,7 @@
     <title>@(ViewData["Title"] ?? "Intranet Hiper Centro")</title>
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="icon" type="image/svg+xml" href="~/images/logo.svg" />
+    @await RenderSectionAsync("Head", required: false)
 </head>
 <body>
     <header class="topbar noPrint">
@@ -23,5 +24,6 @@
     <main class="contenido">
         @RenderBody()
     </main>
+    @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

@@ -7,6 +7,7 @@
 <div class="hero" style="padding-top:18px">
     <h1>Cuadre de Cajas</h1>
     <p>Selecciona la fecha y abre el informe de la tienda</p>
+    <p style="margin-top:14px"><a class="boton" asp-page="Cuadre" style="text-decoration:none">Probar el nuevo cuadre de cajas →</a></p>
 </div>
 
 <form method="get" class="toolbar" style="justify-content:center">
@@ -31,7 +32,10 @@
         var fecha = Fmt.FechaInput(Model.Fecha);   // ISO en la URL, evita barras codificadas
         <tr>
             <td><strong>@alm</strong> — @a.DescAlm</td>
-            <td class="ctr"><a asp-page="CuadreCajas" asp-route-v1="@fecha" asp-route-v2="@alm">Abrir</a></td>
+            <td class="ctr">
+                <a asp-page="CuadreCajas" asp-route-v1="@fecha" asp-route-v2="@alm">Abrir</a> ·
+                <a asp-page="Cuadre" asp-route-fecha="@fecha" asp-route-tienda="@alm">Nuevo</a>
+            </td>
             <td class="ctr"><a asp-page="/Restringida/ResumenVentas" asp-route-v1="@fecha" asp-route-v2="@alm">Abrir</a></td>
             <td class="ctr"><a asp-page="/Restringida/TarjetasCredito" asp-route-v1="@fecha" asp-route-v2="@alm">Abrir</a></td>
             <td class="ctr"><a asp-page="InformeCierre" asp-route-p2="@fecha" asp-route-v2="@alm">Abrir</a></td>

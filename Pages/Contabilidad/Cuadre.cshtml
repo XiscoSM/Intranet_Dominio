@@ -1,0 +1,406 @@
+@page
+@model Intranet.Pages.Contabilidad.CuadreModel
+@using static Intranet.Pages.Contabilidad.CuadreModel
+@{
+    ViewData["Title"] = $"Cuadre {Model.Store} · {Model.Date:dd/MM/yy}";
+    var storeInfo = StatusInfo(Model.StoreStatus);
+    var expandMismatches = Model.Cashiers.Count(c => c.Status == CashStatus.Mismatch) <= 3;
+    var legacyDate = Model.Date.ToString("dd/MM/yy");
+    var cardIssues = Model.CardIssues.ToList();
+    var returns = Model.ReturnsWithoutOriginal.ToList();
+}
+@section Head {
+    <link rel="stylesheet" href="~/css/cuadre.css" asp-append-version="true" />
+}
+
+<form method="get" class="cq-header noPrint" id="cq-form">
+    <div class="cq-title">
+        <h1>Cuadre de cajas</h1>
+        <p>
+            @if (Model.Store != "")
+            {
+                <strong>@Model.Store@(Model.StoreName != "" ? " — " + Model.StoreName : "")</strong>
+                <span> · </span>
+            }
+            <span class="cq-date">@Model.DateText</span>
+        </p>
+    </div>
+
+    <div class="cq-controls">
+        <div class="cq-group" role="group" aria-label="Día">
+            <a class="cq-step" asp-route-fecha="@Model.Date.AddDays(-1).ToString("yyyy-MM-dd")" asp-route-tienda="@Model.Store" title="Día anterior" aria-label="Día anterior">‹</a>
+            <input type="date" name="fecha" value="@Model.DateParam" aria-label="Fecha" data-autosubmit />
+            <a class="cq-step" asp-route-fecha="@Model.Date.AddDays(1).ToString("yyyy-MM-dd")" asp-route-tienda="@Model.Store" title="Día siguiente" aria-label="Día siguiente">›</a>
+        </div>
+
+        <div class="cq-group" role="group" aria-label="Tienda">
+            @if (Model.PreviousStore is not null)
+            {
+                <a class="cq-step" asp-route-fecha="@Model.DateParam" asp-route-tienda="@Model.PreviousStore.Code" title="Tienda anterior: @Model.PreviousStore.Label" aria-label="Tienda anterior">‹</a>
+            }
+            else
+            {
+                <span class="cq-step disabled" aria-hidden="true">‹</span>
+            }
+            <select name="tienda" aria-label="Tienda" data-autosubmit>
+                @foreach (var s in Model.Stores)
+                {
+                    <option value="@s.Code" selected="@(s.Code == Model.Store)">@s.Label@(s.Cashiers > 0 ? $" · {s.Cashiers} cajeros" : "")</option>
+                }
+            </select>
+            @if (Model.NextStore is not null)
+            {
+                <a class="cq-step" asp-route-fecha="@Model.DateParam" asp-route-tienda="@Model.NextStore.Code" title="Tienda siguiente: @Model.NextStore.Label" aria-label="Tienda siguiente">›</a>
+            }
+            else
+            {
+                <span class="cq-step disabled" aria-hidden="true">›</span>
+            }
+        </div>
+        <noscript><button type="submit">Ver</button></noscript>
+
+        <div class="cq-actions">
+            <button type="button" onclick="window.print()">Imprimir</button>
+            <details class="cq-menu">
+                <summary>Más informes</summary>
+                <div>
+                    <a asp-page="InformeCierre" asp-route-p2="@Model.DateParam" asp-route-v2="@Model.Store">Informe de cierre</a>
+                    <a asp-page="InformeBalanzas" asp-route-p2="@Model.DateParam" asp-route-v2="@Model.Store">Balanzas</a>
+                    <a asp-page="/Restringida/TarjetasCredito" asp-route-v1="@Model.DateParam" asp-route-v2="@Model.Store">Tarjetas de crédito</a>
+                    <a asp-page="/Restringida/ResumenVentas" asp-route-v1="@Model.DateParam" asp-route-v2="@Model.Store">Resumen de ventas</a>
+                    <a asp-page="CuadreCajas" asp-route-v1="@Model.DateParam" asp-route-v2="@Model.Store">Vista clásica del cuadre</a>
+                </div>
+            </details>
+        </div>
+    </div>
+</form>
+
+<h1 class="cq-print-title">Cuadre de cajas · @Model.Store @Model.StoreName · @Model.DateText</h1>
+
+@if (Model.Cashiers.Count == 0)
+{
+    <div class="panel cq-empty">
+        <p><strong>No hay cierres de caja</strong> para @(Model.Store == "" ? "ninguna tienda" : $"la tienda {Model.Store}") el @Model.DateText.</p>
+        <p class="info_pequeno">Los cierres se cargan al día siguiente. Prueba con el día anterior o con otra tienda.</p>
+    </div>
+    return;
+}
+
+@* ---------- KPIs ---------- *@
+<section class="cq-kpis" aria-label="Resumen de la tienda">
+    <div class="cq-kpi">
+        <span class="cq-kpi-label">Teórico</span>
+        <span class="cq-kpi-value">@Money(Model.Theoretical)</span>
+        <span class="cq-kpi-help">según el sistema</span>
+    </div>
+    <div class="cq-kpi">
+        <span class="cq-kpi-label">Declarado</span>
+        <span class="cq-kpi-value">@Money(Model.Declared)</span>
+        <span class="cq-kpi-help">contado por los cajeros</span>
+    </div>
+    <div class="cq-kpi cq-kpi-@storeInfo.Css">
+        <span class="cq-kpi-label">Diferencia de la tienda</span>
+        <span class="cq-kpi-value">@SignedMoney(Model.Difference) <small>@DifferenceWord(Model.Difference)</small></span>
+        <span class="estado @storeInfo.Css"><span aria-hidden="true">@storeInfo.Icon</span> @storeInfo.Label</span>
+    </div>
+    <div class="cq-kpi @(Model.CashiersWithIssues > 0 ? "cq-kpi-rev" : "cq-kpi-ok")">
+        <span class="cq-kpi-label">Cajeros a revisar</span>
+        <span class="cq-kpi-value">@Model.CashiersWithIssues <small>de @Model.Cashiers.Count</small></span>
+        @if (Model.CashiersWithIssues > 0)
+        {
+            <a href="?fecha=@Model.DateParam&tienda=@Model.Store&solo=1" class="cq-kpi-help" data-only-issues>Ver solo estos</a>
+        }
+        else
+        {
+            <span class="cq-kpi-help">todos dentro de tolerancia</span>
+        }
+    </div>
+</section>
+
+@* ---------- Avisos del día: only what needs attention ---------- *@
+@if (Model.CrossedDifferences || cardIssues.Count > 0 || returns.Count > 0)
+{
+    <section class="panel cq-avisos" aria-label="Avisos">
+        <h2>Avisos</h2>
+        <ul>
+            @if (Model.CrossedDifferences)
+            {
+                <li class="aviso-rev">
+                    <strong>Descuadres compensados entre cajeros.</strong>
+                    La tienda cuadra (@DifferenceText(Model.Difference)) pero hay cajeros con diferencias opuestas de más de @Money(Model.MismatchThreshold):
+                    probablemente un cajero declaró el efectivo de otro.
+                </li>
+            }
+            @foreach (var (c, l) in cardIssues)
+            {
+                <li class="aviso-ko">
+                    <strong>@l.Name de @c.DisplayName (@c.Code):</strong>
+                    teórico @Money(l.Theoretical), declarado @Money(l.Declared) → @DifferenceText(l.Difference).
+                    @if (c.Status <= CashStatus.Tolerance)
+                    {
+                        <span class="info_pequeno">Compensado con el efectivo: el cajero cuadra en total, pero el cobro se registró con otra forma de pago.</span>
+                    }
+                </li>
+            }
+            @foreach (var (c, a) in returns)
+            {
+                <li class="aviso-rev">
+                    <strong>Devolución sin ticket original</strong> en caja @a.Terminal por @c.DisplayName (@c.Code):
+                    @a.Tickets @(a.Tickets == 1 ? "ticket" : "tickets"), @Money(a.Amount).
+                    <a asp-page="/Restringida/Tickets" asp-route-v1="@Model.DateParam" asp-route-v2="@Model.Store" asp-route-v3="@c.Code" asp-route-v4="6">Ver devoluciones</a>
+                </li>
+            }
+        </ul>
+    </section>
+}
+
+@* ---------- Cashier table ---------- *@
+<div class="cq-tablebar noPrint">
+    <label class="cq-switch">
+        <input type="checkbox" id="cq-only" @(Model.OnlyIssues ? "checked" : "") />
+        Solo cajeros a revisar (≥ @Money(Model.Tolerance))
+    </label>
+    <p class="cq-legend" aria-label="Leyenda">
+        <span class="estado ok">✓ Cuadra</span>
+        <span class="estado tol">≈ Menos de @Money(Model.Tolerance)</span>
+        <span class="estado rev">! Hasta @Money(Model.MismatchThreshold)</span>
+        <span class="estado ko">✕ @Money(Model.MismatchThreshold) o más</span>
+    </p>
+</div>
+
+<div class="cq-tablewrap">
+<table class="cq-table @(Model.OnlyIssues ? "only-issues" : "")" id="cq-table">
+    <thead>
+        <tr>
+            <th class="cq-col-toggle"><span class="sr-only">Detalle</span></th>
+            <th>Estado</th>
+            <th><button type="button" class="cq-sort" data-sort="name">Cajero</button></th>
+            <th>Caja</th>
+            <th class="num"><button type="button" class="cq-sort" data-sort="theo">Teórico</button></th>
+            <th class="num"><button type="button" class="cq-sort" data-sort="decl">Declarado</button></th>
+            <th class="num"><button type="button" class="cq-sort" data-sort="diff" aria-sort="descending">Diferencia</button></th>
+            <th>Avisos</th>
+        </tr>
+    </thead>
+
+    @foreach (var c in Model.Cashiers)
+    {
+        var st = StatusInfo(c.Status);
+        var open = c.Status == CashStatus.Mismatch && expandMismatches;
+        var id = $"cq-d-{c.Store}-{c.Code}";
+        var issue = c.Status >= CashStatus.Review;
+        var cash = c.CashLine;
+        <tbody class="cq-cashier @(issue ? "issue print-open" : "") st-@st.Css"
+               data-name="@c.DisplayName" data-theo="@c.Theoretical.ToString(System.Globalization.CultureInfo.InvariantCulture)"
+               data-decl="@c.Declared.ToString(System.Globalization.CultureInfo.InvariantCulture)"
+               data-diff="@Math.Abs(c.Difference).ToString(System.Globalization.CultureInfo.InvariantCulture)">
+            <tr class="cq-row">
+                <td class="cq-col-toggle">
+                    <button type="button" class="cq-toggle" aria-expanded="@(open ? "true" : "false")" aria-controls="@id"
+                            aria-label="Ver detalle de @c.DisplayName">
+                        <span aria-hidden="true">›</span>
+                    </button>
+                </td>
+                <td><span class="estado @st.Css"><span aria-hidden="true">@st.Icon</span> @st.Label</span></td>
+                <td class="cq-name">
+                    <span class="cq-code">@c.Code</span> @c.DisplayName
+                </td>
+                <td>@string.Join(", ", c.Terminals)</td>
+                <td class="num">@Money(c.Theoretical)</td>
+                <td class="num">@Money(c.Declared)</td>
+                <td class="num cq-diff st-@st.Css">@DifferenceText(c.Difference)</td>
+                <td class="cq-tags">
+                    @if (c.NonCashIssues.Any())
+                    {
+                        <span class="tag ko">Datáfono no cuadra</span>
+                    }
+                    @if (c.ReturnsWithoutOriginal.Any())
+                    {
+                        <span class="tag rev">Devolución sin original</span>
+                    }
+                    @if (c.OpeningFloat != 0)
+                    {
+                        <span class="tag info">Fondo de entrada</span>
+                    }
+                    @if (c.IsSupervisor)
+                    {
+                        <span class="tag neutral">Responsable</span>
+                    }
+                </td>
+            </tr>
+            <tr class="cq-detail" id="@id" @(open ? "" : "hidden")>
+                <td colspan="8">
+                    <div class="cq-detail-grid">
+                        <div>
+                            <h3>Desglose por forma de pago</h3>
+                            <table class="cq-sub">
+                                <thead>
+                                    <tr><th>Forma de pago</th><th class="num">Teórico</th><th class="num">Declarado</th><th class="num">Diferencia</th></tr>
+                                </thead>
+                                <tbody>
+                                @foreach (var l in c.VisibleLines)
+                                {
+                                    var lst = StatusInfo(Model.Classify(l.Difference));
+                                    <tr class="@(l.Counted ? "" : "not-counted")">
+                                        <td>@l.Name@(l.Counted ? "" : " (no computa)")</td>
+                                        <td class="num">@Money(l.Theoretical, true)</td>
+                                        <td class="num">@Money(l.Declared, true)</td>
+                                        <td class="num cq-diff st-@(l.Difference == 0 ? "none" : lst.Css)">@(l.Difference == 0 ? "—" : DifferenceText(l.Difference))</td>
+                                    </tr>
+                                }
+                                @if (c.Payments != 0)
+                                {
+                                    <tr>
+                                        <td>Pagos en caja</td>
+                                        <td class="num">@Money(c.Payments)</td>
+                                        <td class="num">@Money(c.Payments)</td>
+                                        <td class="num">—</td>
+                                    </tr>
+                                }
+                                </tbody>
+                            </table>
+                            @if (cash is not null && (c.Withdrawals != 0 || c.OpeningFloat != 0))
+                            {
+                                <p class="cq-formula">
+                                    Efectivo declarado =
+                                    contado <strong>@Money(c.CashCounted)</strong>
+                                    @if (c.Withdrawals != 0) { <text>+ retiradas <strong>@Money(c.Withdrawals)</strong></text> }
+                                    @if (c.OpeningFloat != 0) { <text>− fondo de entrada <strong>@Money(c.OpeningFloat)</strong></text> }
+                                    = <strong>@Money(cash.Declared)</strong>
+                                </p>
+                            }
+                            @if (c.HiddenLines > 0)
+                            {
+                                <p class="info_pequeno">@c.HiddenLines @(c.HiddenLines == 1 ? "forma de pago sin movimiento oculta" : "formas de pago sin movimiento ocultas").</p>
+                            }
+                        </div>
+
+                        <div>
+                            <h3>Actividad</h3>
+                            @if (c.Activity.Count > 0)
+                            {
+                                <table class="cq-sub">
+                                    <thead>
+                                        <tr><th>Caja</th><th>Tipo</th><th>Horario</th><th class="num">Tickets</th><th class="num">Importe</th></tr>
+                                    </thead>
+                                    <tbody>
+                                    @foreach (var a in c.Activity)
+                                    {
+                                        <tr class="@(a.ReturnWithoutOriginal ? "row-rev" : "")">
+                                            <td>@a.Terminal</td>
+                                            <td>
+                                                @a.TicketType
+                                                @if (a.ReturnWithoutOriginal) { <span class="tag rev">sin original</span> }
+                                            </td>
+                                            <td class="info_pequeno">@a.Schedule</td>
+                                            <td class="num">@a.Tickets</td>
+                                            <td class="num">@Money(a.Amount)</td>
+                                        </tr>
+                                    }
+                                    </tbody>
+                                </table>
+                            }
+                            else
+                            {
+                                <p class="info_pequeno">Sin actividad registrada.</p>
+                            }
+
+                            <div class="cq-links noPrint">
+                                <a class="boton" asp-page="/Restringida/Tickets" asp-route-v1="@Model.DateParam" asp-route-v2="@Model.Store" asp-route-v3="@c.Code">Tickets de venta</a>
+                                <a class="boton" asp-page="/Restringida/Tickets" asp-route-v1="@Model.DateParam" asp-route-v2="@Model.Store" asp-route-v3="@c.Code" asp-route-v4="6">Devoluciones</a>
+                                <a class="boton" asp-page="/Restringida/Tickets" asp-route-v1="@Model.DateParam" asp-route-v2="@Model.Store" asp-route-v3="@c.Code" asp-route-v4="14" asp-route-support="@(Model.Support ? "1" : null)">Retiradas</a>
+                                @foreach (var t in c.Terminals)
+                                {
+                                    <a class="boton" asp-page="/Restringida/TicketsCaja" asp-route-v1="@Model.DateParam" asp-route-v2="@Model.Store" asp-route-v3="@t">Facturas simplificadas caja @t</a>
+                                }
+                                <a class="boton" href="/MADISA NET/Gestion/Cambios de pvp.asp?V1=@legacyDate&V2=@Model.Store&V3=@c.Code">Cambios de PVP</a>
+                            </div>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    }
+
+    <tfoot>
+        <tr>
+            <td></td>
+            <td><span class="estado @storeInfo.Css"><span aria-hidden="true">@storeInfo.Icon</span> @storeInfo.Label</span></td>
+            <td colspan="2"><strong>Total tienda</strong> · @Model.Cashiers.Count cajeros</td>
+            <td class="num">@Money(Model.Theoretical)</td>
+            <td class="num">@Money(Model.Declared)</td>
+            <td class="num cq-diff st-@storeInfo.Css">@DifferenceText(Model.Difference)</td>
+            <td class="info_pequeno">
+                @if (Model.AbsoluteDifference != Math.Abs(Model.Difference))
+                {
+                    <text>Suma de descuadres: @Money(Model.AbsoluteDifference)</text>
+                }
+            </td>
+        </tr>
+    </tfoot>
+</table>
+</div>
+<p class="cq-none-msg noPrint" id="cq-none" hidden>Ningún cajero supera la tolerancia de @Money(Model.Tolerance). 🎉</p>
+
+@* ---------- Secondary information, folded ---------- *@
+<details class="panel cq-fold" @(Model.CardsDifference != 0 || Model.Cards.Any(k => k.Difference != 0) ? "open" : "")>
+    <summary>
+        Conciliación de tarjetas por tipo
+        <span class="cq-fold-state">
+            @if (Model.Cards.All(k => k.Difference == 0))
+            {
+                <span class="estado ok">✓ cuadran</span>
+            }
+            else
+            {
+                <span class="estado ko">✕ @DifferenceText(Model.CardsDifference)</span>
+            }
+        </span>
+    </summary>
+    <table class="cq-sub">
+        <thead><tr><th>Tipo</th><th class="num">Teórico</th><th class="num">Declarado</th><th class="num">Diferencia</th></tr></thead>
+        <tbody>
+        @foreach (var k in Model.Cards)
+        {
+            var kst = StatusInfo(Model.Classify(k.Difference));
+            <tr>
+                <td>@k.Name</td>
+                <td class="num">@Money(k.Theoretical)</td>
+                <td class="num">@Money(k.Declared)</td>
+                <td class="num cq-diff st-@(k.Difference == 0 ? "none" : kst.Css)">@(k.Difference == 0 ? "—" : DifferenceText(k.Difference))</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+</details>
+
+<details class="panel cq-fold noPrint">
+    <summary>Operaciones TEF por banco <span class="cq-fold-state info_pequeno">@Model.TefOperations.Count @(Model.TefOperations.Count == 1 ? "línea" : "líneas")</span></summary>
+    @if (Model.TefOperations.Count == 0)
+    {
+        <p class="info_pequeno">Esta tienda no tiene operaciones TEF (solo datáfono).</p>
+    }
+    else
+    {
+        <table class="cq-sub">
+            <thead><tr><th>Banco</th><th>Marca</th><th>Operación</th><th class="num">Importe</th></tr></thead>
+            <tbody>
+            @foreach (var r in Model.TefOperations)
+            {
+                <tr>
+                    <td>@r.CentroAuto</td>
+                    <td>@r.Tipo</td>
+                    <td>@r.TipoOper</td>
+                    <td class="num">@Money(Fmt.D(r.Amount))</td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    }
+</details>
+
+<p class="cq-printed info_pequeno">Impreso por @User.Identity?.Name · @DateTime.Now.ToString("dd/MM/yyyy HH:mm")</p>
+
+@section Scripts {
+    <script src="~/js/cuadre.js" asp-append-version="true"></script>
+}
